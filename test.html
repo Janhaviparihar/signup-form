@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup Form</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <style>
+        /* CSS for password strength meter */
+        #password-strength-meter 
+        {
+            margin-top:10px;
+            height:10px;
+            background: #a3debc;
+        }
+        #password-strength-meter div 
+        {
+            height:100%;
+            width:0;
+        }
+        .weak 
+        {
+            background: #FF0000;
+        }
+        .medium 
+        {
+            background: #FFD700;
+        }
+        .strong 
+        {
+            background: #00FF00;
+        }
+
+        /* CSS for form container */
+        .form-container 
+        {
+        border: 2px solid #ccc;
+        background-color: #f9f9f9; 
+        padding: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container mt-5 form-container">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <h2 class="mb-3">Signup Form</h2>
+                <form id="signupForm" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" required>
+                        <div class="invalid-feedback">Please choose a username.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" required>
+                        <div class="invalid-feedback">Please enter a valid email address.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" required>
+                        <div id="password-strength-meter"></div>
+                        <div class="invalid-feedback">Please enter a password with at least 8 characters.</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Sign Up</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Popup for Error Messages -->
+    <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="errorMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmationModal" class="modal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Confirmation</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="confirmationBody">
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary" id="confirmButton">Confirm</button>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+    <script>
+        // JavaScript for password strength meter
+        const password=document.getElementById("password");
+        const meter=document.getElementById("password-strength-meter");
+
+        password.addEventListener("input", function () 
+        {
+            const value=password.value;
+            const strength=calculatePasswordStrength(value);
+            meter.style.width=(strength*25)+"%";
+            meter.className=getStrengthClass(strength);
+        });
+
+        function calculatePasswordStrength(password) 
+        {
+            let strength=0;
+            if (password.length>=8) 
+            {
+                strength += 1;
+            }
+            if (password.length>=12) 
+            {
+                strength += 1;
+            }
+            if (/[a-z]/.test(password)) 
+            {
+                strength += 1;
+            }
+            if (/[A-Z]/.test(password)) 
+            {
+                strength += 1;
+            }
+            if (/[0-9]/.test(password)) 
+            {
+                strength += 1;
+            }
+            if (/[^a-zA-Z0-9]/.test(password)) 
+            {
+                strength += 1;
+            }
+            return strength;
+        }
+
+        function getStrengthClass(strength) 
+        {
+            if(strength<3) 
+            {
+                return "weak";
+            } 
+            else if(strength<5) 
+            {
+                return "medium";
+            } 
+            else 
+            {
+                return "strong";
+            }
+        }
+
+        // JavaScript for form validation
+        const form=document.getElementById("signupForm");
+
+        form.addEventListener("submit", function (event) 
+        {
+            if (!form.checkValidity()) 
+            {
+                event.preventDefault();
+                event.stopPropagation();
+                showErrorModal("Please fill out all required fields.");
+            } 
+            else 
+            {
+                // Form is valid, display confirmation modal
+                event.preventDefault();
+                const username=document.getElementById("username").value;
+                const email=document.getElementById("email").value;
+                const password=document.getElementById("password").value;
+
+                // Display confirmation message
+                const confirmationMessage=`Username: ${username}<br>
+                Email: ${email}<br>
+                Password: ${'*'.repeat(password.length)}`;
+                showConfirmationModal(confirmationMessage);
+
+                //close confirmation modal
+                document.getElementById("confirmButton").addEventListener("click", function()
+                {
+                closeConfirmationModal(); // Close the confirmation modal
+                });
+
+                //reset form values
+                document.getElementById("confirmButton").addEventListener("click", function() 
+                {
+                resetForm();
+                });
+            }
+            form.classList.add("was-validated");
+        });
+
+        // Function to show error modal
+        function showErrorModal(errorMessage) 
+        {
+            $('#errorMessage').html(errorMessage);
+            $('#errorModal').modal('show');
+        }
+
+        // Function to show confirmation modal
+        function showConfirmationModal(confirmationMessage) 
+        {
+            $('#confirmationBody').html(confirmationMessage);
+            $('#confirmationModal').modal('show');
+        }
+
+        // Function to close confirmation modal
+        function closeConfirmationModal() 
+        {
+        $('#confirmationModal').modal('hide');
+        }
+
+        // Function to reset form values
+        function resetForm() 
+        {
+        document.getElementById("signupForm").reset();
+        form.classList.remove("was-validated");
+        }
+        
+    </script>
+</body>
+</html>
